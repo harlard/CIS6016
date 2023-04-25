@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <ode/ode.h>
 
 
 #include "Utils/controls.hpp"
@@ -60,7 +61,12 @@ int main(void)
 		return -1;
 	}
 
+
+// Initialize ODE engine
 	initOpenAL();
+	dInitODE();
+	dWorldID world = dWorldCreate();
+	dWorldSetGravity(world, 0, -9.81, 0);
 
 	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
@@ -100,6 +106,8 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+		//Update ode
+		dWorldStep(world, deltaTime);
 
 		// Compute the MVP matrix from keyboard and mouse input
 
@@ -141,12 +149,19 @@ int main(void)
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-	} // Check if the ESC key was pressed or the window was closed
+	}
+
+	// Check if the ESC key was pressed or the window was closed
 	while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
 		   glfwWindowShouldClose(window) == 0 );
-//OpenAL cleaning
+	//OpenAL cleaning
 	alcDestroyContext(context);
  	alcCloseDevice(device);
+
+	// ODE Cleaning
+	dWorldDestroy(world);
+	dCloseODE();
+
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 
