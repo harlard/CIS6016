@@ -21,19 +21,27 @@ public:
     std::shared_ptr<GameObject> getGameObjectByName(const std::string& name) {
 
     void createNewCamera(std::string cameraId, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front);
+    Camera* getCurrentCamera();
+    Camera* getCamera(std::string cameraId);
     void useNextCamera();
-    void useCameraWithId(std::string cameraId);
-    Camera* GetCurrentCamera();
+    void useCamera(std::string cameraId);
+    void removeCamera(std::string cameraId);
+
 
     void createNewSkyBox(std::string skyboxId, const std::string& directory);
-    void nextSkybox();
-    void useSkyboxWithId(std::string skyboxId);
+    void useNextSkybox();
+    Skybox* getCurrentSkybox();
+    Skybox* getCamera(std::string skyboxId);
+    void useSkybox(std::string skyboxId);
+    void removeSkybox(std::string skyboxId);
 
 
+
+    void cleanup();
 
 private:
-    int cameraInUse;
-    int skyBoxInUse;
+    std::string cameraInUse;
+    std::string skyBoxInUse;
     std::vector<Camera> cameras;
     std::vector<Skybox> skyboxes;
     std::vector<std::shared_ptr<GameObject>> gameObjects;

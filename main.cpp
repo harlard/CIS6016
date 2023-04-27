@@ -8,12 +8,11 @@
 
 int main() {
     // Initialize the managers
-    GlewManager glewManager;
     glfwManager glfwManager;
     OpenAlManager openAlManager;
     ODEManager odeManager;
     InputManager inputManager;
-    GameObjectManager objectManager;
+    GameObjectManager gameObjectManager;
 
     //initialize delta time
     float deltaTime;
@@ -28,7 +27,9 @@ int main() {
     glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
     glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
     gameObjectManager.createNewCamera("main_camera", cameraPosition, cameraUp, cameraFront);
-
+    gameObjectManager.useCamera("main_camera");
+    gameObjectManager.createNewSkyBox("test", "Assets/Skybox/Test");
+    gameObjectManager.useSkybox("test");
 
     // Game loop
     while (!glfwManager.shouldClose()) {
@@ -38,11 +39,11 @@ int main() {
         inputManager.processInput();
 
         // Updates
-        objectManager.update(deltaTime);
         odeManager.update(deltaTime);
+        gameObjectManager.update(deltaTime);
 
         // Render the game objects
-        objectManager.draw();
+        gameObjectManager.draw();
 
         // Swap buffers and poll events
         glfwManager.swapBuffers();

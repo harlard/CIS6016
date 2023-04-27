@@ -3,12 +3,12 @@
 Skybox::Skybox(const std::string& id, const std::string& directory) : skyboxId_(id)
 {
     faces_ = {
-        directory + "right.jpg",
-        directory + "left.jpg",
-        directory + "top.jpg",
-        directory + "bottom.jpg",
-        directory + "front.jpg",
-        directory + "back.jpg"
+        directory + "/right.png",
+        directory + "/left.png",
+        directory + "/top.png",
+        directory + "/bottom.png",
+        directory + "/front.png",
+        directory + "/back.png"
     };
     loadCubemap();
     loadShaders();
