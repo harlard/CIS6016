@@ -1,5 +1,5 @@
 #include "GlfwManager.h"
-#include "OpenAlManager.h"
+#include "OpenALManager.h"
 #include "ODEManager.h"
 #include "InputManager.h"
 #include "GameObjectManager.h"
@@ -8,10 +8,9 @@
 
 int main() {
     // Initialize the managers
-    glfwManager glfwManager;
-    OpenAlManager openAlManager;
+    GlfwManager glfwManager;
+    OpenALManager openAlManager;
     ODEManager odeManager;
-    InputManager inputManager;
     GameObjectManager gameObjectManager;
 
     //initialize delta time
@@ -19,8 +18,7 @@ int main() {
 
     // Initialize the window and input callbacks
     glfwManager.init(800, 600);
-    inputManager.init(glfwManager.getWindow());
-    odeManager.init();
+    InputManager inputManager(glfwManager.getWindow());
 
     //Set the Camera
     glm::vec3 cameraPosition(0.0f, 0.0f, 3.0f);
@@ -28,7 +26,7 @@ int main() {
     glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
     gameObjectManager.createNewCamera("main_camera", cameraPosition, cameraUp, cameraFront);
     gameObjectManager.useCamera("main_camera");
-    gameObjectManager.createNewSkyBox("test", "Assets/Skybox/Test");
+    gameObjectManager.createNewSkybox("test", "Assets/Skybox/Test");
     gameObjectManager.useSkybox("test");
 
     // Game loop
@@ -52,9 +50,7 @@ int main() {
 
     // Clean up
     odeManager.cleanup();
-    openAlManager.cleanup();
     glfwManager.cleanup();
-    glewManager.cleanup();
 
     return 0;
-}
+    }

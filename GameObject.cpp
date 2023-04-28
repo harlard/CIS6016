@@ -1,7 +1,7 @@
 #include "GameObject.h"
 
-GameObject::GameObject(const std::string& name)
-    : name(name), position(glm::vec3(0.0f)), rotation(glm::vec3(0.0f)), scale(glm::vec3(1.0f)), mesh(nullptr)
+GameObject::GameObject(const std::string& name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale)
+    : name(name), position(position), rotation(rotation), scale(scale), mesh(nullptr)
 {
 }
 
@@ -11,6 +11,18 @@ GameObject::~GameObject()
         delete child;
     }
 }
+
+
+
+void GameObject::setMesh(Mesh* mesh)
+{
+    this->mesh = mesh;
+}
+
+void GameObject::setShader(ShaderProgram* shaderProgram){
+  this->shaderProgram = shaderProgram;
+}
+
 
 void GameObject::setPosition(const glm::vec3& position)
 {
@@ -40,11 +52,6 @@ void GameObject::setScale(const glm::vec3& scale)
 glm::vec3 GameObject::getScale() const
 {
     return scale;
-}
-
-void GameObject::setMesh(Mesh* mesh)
-{
-    this->mesh = mesh;
 }
 
 Mesh* GameObject::getMesh() const
@@ -85,15 +92,15 @@ void GameObject::update(float deltaTime)
 void GameObject::draw(const glm::mat4& parentTransform, const glm::mat4& view)
 {
     glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, position_);
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation_.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation_.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation_.z), glm::vec3(0.0f, 0.0f, 1.0f));
-    modelMatrix = glm::scale(modelMatrix, scale_);
+    modelMatrix = glm::translate(modelMatrix, position);
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+    modelMatrix = glm::scale(modelMatrix, scale);
 
     glm::mat4 globalTransform = parentTransform * modelMatrix;
 
-    if (mesh_ && shaderProgram_)
+    if (mesh && shaderProgram)
     {
         shaderProgram->use();
         shaderProgram->setMat4("model", globalTransform);
@@ -101,7 +108,7 @@ void GameObject::draw(const glm::mat4& parentTransform, const glm::mat4& view)
         mesh->draw();
     }
 
-    for (auto& child : children_)
+    for (auto& child : children)
     {
         child->draw(globalTransform, view);
     }

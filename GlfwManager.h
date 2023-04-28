@@ -1,9 +1,7 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 class GlfwManager {
@@ -19,11 +17,11 @@ public:
     bool shouldClose() const;
     void swapBuffers() const;
     void pollEvents() const;
-    float GetDeltaTime();
+    float getDeltaTime();
 
 private:
       GLFWwindow* window;
       int width;
       int height;
-      static double deltaTime;
+      static double prevTime;
     };

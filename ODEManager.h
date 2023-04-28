@@ -1,28 +1,27 @@
-#pragma once
+#ifndef ODE_MANAGER_H
+#define ODE_MANAGER_H
 
-#include <ode/ode.h>
 #include <vector>
+#include <algorithm>
+#include <ode/ode.h>
+#include <ode/contact.h>
+#include "ODEObject.h"
 
 class ODEManager {
 public:
     ODEManager();
     ~ODEManager();
-    void init();
+    void update(float dt);
+    static void nearCallback(void* data, dGeomID o1, dGeomID o2);
+    void addObject(ODEObject* object);
+    void removeObject(ODEObject* object);
     void cleanup();
-    void update(double deltaTime);
-    dWorldID getWorldID() const;
-    dJointGroupID getContactJointGroupID() const;
-    void addObject(dGeomID geom, dReal mass);
-    void removeObjects();
 
 private:
-    void nearCallback(void* data, dGeomID o1, dGeomID o2);
-
-    dWorldID worldID;
-    dSpaceID spaceID;
-    dJointGroupID contactJointGroupID;
-    std::vector<dBodyID> bodyIDs;
-    std::vector<dGeomID> geomIDs;
-    std::vector<dMass> masses;
-    int objectCount;
+    static dWorldID world;
+    static dSpaceID space;
+    static dJointGroupID contactgroup;
+    std::vector<ODEObject*> objects;
 };
+
+#endif // ODE_MANAGER_H

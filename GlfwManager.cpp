@@ -3,8 +3,7 @@
 GlfwManager::GlfwManager() : window(nullptr) {}
 
 GlfwManager::~GlfwManager() {
-    cleanup();
-}
+  }
 
 bool GlfwManager::init(int widthW, int heightW) {
   width = widthW;
@@ -34,23 +33,14 @@ bool GlfwManager::init(int widthW, int heightW) {
   }
 
   // Set the viewport size
-  glfwGetFramebufferSize(window, width, height);
+  glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
-  
-  // Initialize glad
-  if (!gladLoadGL()) {
-      // Handle error
-      return -1;
-  }
+
 
   return(true);
 }
 
 void GlfwManager::cleanup() {
-
-    gladLoaderUnload();
-    glewShutdown();
-
     if (window) {
         glfwDestroyWindow(window);
         window = nullptr;

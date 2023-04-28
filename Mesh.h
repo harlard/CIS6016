@@ -2,7 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -25,6 +27,11 @@ public:
         std::string name;
         int id;
         glm::mat4 offset;
+        std::vector<std::pair<int, float>> weights;
+
+        void addWeight(int vertexId, float weight) {
+          weights.emplace_back(vertexId, weight);
+        }
     };
 
     struct Animation {

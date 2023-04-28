@@ -3,6 +3,9 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_projection.hpp>
 
 class Camera {
 public:
@@ -14,8 +17,8 @@ public:
 
     void zoom(float deltaY);
     void look(float deltaX, float deltaY);
-    void move(CameraMovement direction, float deltaTime);
-
+    void move(const glm::vec3& direction, float deltaTime);
+    void lookAt(const glm::vec3& target);
 
     void updateVectors_();
 
@@ -24,15 +27,24 @@ public:
     glm::vec3 getRotation() const;
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
+    std::string getCameraId() const;
 
     void setFarClip(float farClip);
     void setNearClip(float nearClip);
+    float getNearClip() const;
+    float getFarClip() const;
 
 private:
     std::string cameraId_;
 
     glm::vec3 position_;
     glm::vec3 rotation_;
+    glm::vec3 front_;
+    glm::vec3 right_;
+    glm::vec3 up_;
+    glm::vec3 worldUp_;
+
+
 
     int viewportWidth_;
     int viewportHeight_;

@@ -1,41 +1,131 @@
 #include "Skybox.h"
+#include <iostream>
+#include <ostream>
+#include <memory>
 
-Skybox::Skybox(const std::string& id, const std::string& directory) : skyboxId_(id)
+static const float vertices_[108] = {
+    // Back face
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    // Front face
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+    // Left face
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    // Right face
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    // Bottom face
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    // Top face
+    -1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f
+};
+
+Skybox::Skybox(const std::string& skyboxId, const std::string& directory)
+: skyboxId_(skyboxId), shaderProgram_(nullptr)
 {
+    // Define the faces of the cubemap
     faces_ = {
-        directory + "/right.png",
-        directory + "/left.png",
-        directory + "/top.png",
-        directory + "/bottom.png",
-        directory + "/front.png",
-        directory + "/back.png"
+    directory + "/right.jpg",
+    directory + "/left.jpg",
+    directory + "/top.jpg",
+    directory + "/bottom.jpg",
+    directory + "/front.jpg",
+    directory + "/back.jpg"
     };
-    loadCubemap();
-    loadShaders();
+
     setup();
-}
+    // Load the cubemap texture
+    loadCubemap();
+  }
 
 Skybox::~Skybox()
 {
-    glDeleteTextures(1, &cubemapcubemapTextureID_);
-    glDeleteVertexArrays(1, &vaoID_);
-    glDeleteBuffers(1, &vboID_);
-    glDeleteProgram(shaderProgramID_);
+// Delete the VAO and VBO
+  glDeleteVertexArrays(1, &vaoID_);
+  glDeleteBuffers(1, &vboID_);
+  // Delete the cubemap texture
+  glDeleteTextures(1, &cubemapTextureID_);
+
+}
+
+std::string Skybox::getSkyboxId() const
+{
+    return skyboxId_;
+}
+
+void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
+{
+    // Disable depth testing to make sure the skybox is always drawn behind everything else
+    glDepthMask(GL_FALSE);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    // Use the skybox shader program
+    if (shaderProgram_)
+        shaderProgram_->use();
+
+    // Set the view and projection matrices in the shader program
+    if (shaderProgram_)
+        shaderProgram_->setMat4("view", view);
+    if (shaderProgram_)
+        shaderProgram_->setMat4("projection", projection);
+
+    // Bind the cubemap texture
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureID_);
+
+    // Draw the skybox
+    glBindVertexArray(vaoID_);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+
+    // Re-enable depth testing
+    glDepthMask(GL_TRUE);
+}
+
+void Skybox::setShaderProgram(std::shared_ptr<ShaderProgram> shaderProgram)
+{
+  shaderProgram_ = shaderProgram;
 }
 
 void Skybox::setup()
 {
+    // Create and bind the VAO
     glGenVertexArrays(1, &vaoID_);
-    glGenBuffers(1, &vboID_);
-
     glBindVertexArray(vaoID_);
+    // Create and bind the VBO
+    glGenBuffers(1, &vboID_);
     glBindBuffer(GL_ARRAY_BUFFER, vboID_);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_), &vertices_[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_), vertices_, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
+    // Set the vertex attribute pointers
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-    glBindVertexArray(0);
+    glEnableVertexAttribArray(0);
 }
 
 void Skybox::loadCubemap()
@@ -49,41 +139,28 @@ void Skybox::loadCubemap()
         unsigned char* data = stbi_load(faces_[i].c_str(), &width, &height, &nrChannels, 0);
         if (data)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+            GLenum format;
+            if (nrChannels == 1)
+                format = GL_RED;
+            else if (nrChannels == 3)
+                format = GL_RGB;
+            else if (nrChannels == 4)
+                format = GL_RGBA;
+
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
             stbi_image_free(data);
         }
         else
         {
-            std::cout << "Cubemap texture failed to load at path: " << faces_[i] << std::endl;
+            std::cout << "Skybox::loadCubemap() - Failed to load texture: " << faces_[i] << std::endl;
             stbi_image_free(data);
         }
     }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-}
-
-void Skybox::loadShaders()
-{
-    shaderProgramId_ = std::make_shared<ShaderProgram>();
-    shaderProgramId_->create();
-    shaderProgramId_->attachShader("shaders/skybox.vert", GL_VERTEX_SHADER);
-    shaderProgramId_->attachShader("shaders/skybox.frag", GL_FRAGMENT_SHADER);
-    shaderProgramId_->link();
-}
-
-void Skybox::draw(const glm::mat4& projection, const glm::mat4& view)
-{
-    glDepthMask(GL_FALSE);
-    shaderProgramId_->use();
-    shaderProgramId_->setMat4("view", view);
-    shaderProgramId_->setMat4("projection", projection);
-    glBindVertexArray(vaoID_);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureID_);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
-    glDepthMask(GL_TRUE);
 }

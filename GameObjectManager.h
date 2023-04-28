@@ -16,11 +16,11 @@ public:
     void update(float deltaTime);
     void draw();
 
-    std::shared_ptr<GameObject> createGameObject(const std::string& meshFilePath);
+    std::shared_ptr<GameObject> createGameObject(const std::string& name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
     void destroyGameObject(std::shared_ptr<GameObject> gameObject);
-    std::shared_ptr<GameObject> getGameObjectByName(const std::string& name) {
+    std::shared_ptr<GameObject> getGameObjectByName(const std::string& name);
 
-    void createNewCamera(std::string cameraId, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front);
+    void createNewCamera(const std::string cameraId, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front);
     Camera* getCurrentCamera();
     Camera* getCamera(std::string cameraId);
     void useNextCamera();
@@ -28,21 +28,19 @@ public:
     void removeCamera(std::string cameraId);
 
 
-    void createNewSkyBox(std::string skyboxId, const std::string& directory);
+    void createNewSkybox(const std::string skyboxId, const std::string& directory);
     void useNextSkybox();
     Skybox* getCurrentSkybox();
-    Skybox* getCamera(std::string skyboxId);
+    Skybox* getSkybox(std::string skyboxId);
     void useSkybox(std::string skyboxId);
     void removeSkybox(std::string skyboxId);
-
-
 
     void cleanup();
 
 private:
     std::string cameraInUse;
-    std::string skyBoxInUse;
+    std::string skyboxInUse;
     std::vector<Camera> cameras;
     std::vector<Skybox> skyboxes;
     std::vector<std::shared_ptr<GameObject>> gameObjects;
-};
+    };

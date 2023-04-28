@@ -1,11 +1,12 @@
 #include "Camera.h"
 
 Camera::Camera(const std::string& id, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front)
-    : cameraId(id), position_(position), rotation_(glm::vec3(0.0f)), viewportWidth_(0), viewportHeight_(0),
+    : cameraId_(id), position_(position), rotation_(glm::vec3(0.0f)), viewportWidth_(0), viewportHeight_(0),
       fieldOfView_(glm::radians(45.0f)), nearClip_(0.1f), farClip_(100.0f),
-      movementSpeed_(1.0f), sensitivity_(0.1f), yaw_(0.0f), pitch_(0.0f)
-{
-    updateVectors_();
+      movementSpeed_(1.0f), sensitivity_(0.1f), yaw_(0.0f), pitch_(0.0f),
+      front_(front), right_(glm::normalize(glm::cross(front_, up))), up_(glm::normalize(glm::cross(right_, front_))), worldUp_(up)
+    {
+      updateVectors_();
 }
 
 glm::vec3 Camera::getPosition() const
@@ -65,25 +66,31 @@ glm::mat4 Camera::getProjectionMatrix() const
     return glm::perspective(fieldOfView_, static_cast<float>(viewportWidth_) / viewportHeight_, nearClip_, farClip_);
 }
 
-void Camera::move(CameraMovement direction, float deltaTime)
+std::string Camera::getCameraId() const
 {
-    float velocity = movementSpeed_ * deltaTime;
-    switch (direction)
-    {
-    case FORWARD:
-        position_ += front_ * velocity;
-        break;
-    case BACKWARD:
-        position_ -= front_ * velocity;
-        break;
-    case LEFT:
-        position_ -= right_ * velocity;
-        break;
-    case RIGHT:
-        position_ += right_ * velocity;
-        break;
-    }
+  return cameraId_;
 }
+
+void Camera::move(const glm::vec3& direction, float deltaTime)
+{
+    position_ += direction * movementSpeed_ * deltaTime;
+}
+
+void Camera::lookAt(const glm::vec3& target) {
+    glm::vec3 newFront = glm::normalize(target - position_);
+    glm::vec3 newRight = glm::normalize(glm::cross(worldUp_, newFront));
+    glm::vec3 newUp = glm::normalize(glm::cross(newFront, newRight));
+
+    front_ = newFront;
+    right_ = newRight;
+    up_ = newUp;
+
+    yaw_ = glm::degrees(std::atan2(newFront.z, newFront.x));
+    pitch_ = glm::degrees(std::asin(newFront.y));
+
+    updateVectors_();
+}
+
 
 void Camera::look(float deltaX, float deltaY)
 {

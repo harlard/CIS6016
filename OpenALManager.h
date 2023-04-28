@@ -4,7 +4,10 @@
 #include <AL/alc.h>
 #include <glm/glm.hpp>
 #include <string>
+#include <algorithm>
 #include <vector>
+#include <sndfile.h>
+
 
 struct Sound {
     ALuint id;

@@ -98,7 +98,6 @@ void Mesh::loadMesh(const std::string& filePath) {
 
     glBindVertexArray(0);
 }
-
 void Mesh::loadAnimations(const aiScene* scene) {
     for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
         aiAnimation* anim = scene->mAnimations[i];
@@ -112,102 +111,28 @@ void Mesh::loadAnimations(const aiScene* scene) {
         }
 
         animations.push_back(animation);
+    }
 }
 
 void Mesh::loadBones(aiMesh* mesh, std::vector<Bone>& bones) {
+    std::map<int, int> bonesMap;
     for (unsigned int i = 0; i < mesh->mNumBones; i++) {
         aiBone* bone = mesh->mBones[i];
+        Bone newBone;
+        newBone.name = bone->mName.C_Str();
+        newBone.offset = glm::make_mat4(&bone->mOffsetMatrix[0][0]);
 
-        // Check if the bone already exists
-        int boneIndex = -1;
-        for (unsigned int j = 0; j < bones.size(); j++) {
-            if (bones[j].name == bone->mName.C_Str()) {
-                boneIndex = j;
-                break;
-            }
-        }
-
-        // If the bone doesn't exist, create a new one
-        if (boneIndex == -1) {
-            boneIndex = bones.size();
-            Bone newBone;
-            newBone.name = bone->mName.C_Str();
-            newBone.id = boneIndex;
-            newBone.offset = glm::transpose(glm::make_mat4(&bone->mOffsetMatrix.a1));
-            bones.push_back(newBone);
-        }
-
-        // Add the bone weights to the vertices
         for (unsigned int j = 0; j < bone->mNumWeights; j++) {
-            unsigned int vertexId = bone->mWeights[j].mVertexId;
-            float weight = bone->mWeights[j].mWeight;
-            for (unsigned int k = 0; k < 4; k++) {
-                if (vertices[vertexId].boneIds[k] == -1) {
-                    vertices[vertexId].boneIds[k] = boneIndex;
-                    vertices[vertexId].weights[k] = weight;
-                    break;
-                }
+            aiVertexWeight weight = bone->mWeights[j];
+            int vertexId = weight.mVertexId;
+            float weightValue = weight.mWeight;
+
+            if (bonesMap.find(vertexId) == bonesMap.end()) {
+                bonesMap[vertexId] = bones.size();
+                bones.push_back(newBone);
             }
+
+            bones[bonesMap[vertexId]].addWeight(i, weightValue);
         }
-    }
-}
-
-void Mesh::updateAnimation(float animationTime, const std::string& animationName, glm::mat4 parentTransform)
-{
-    const Animation* animation = nullptr;
-    for (const Animation& anim : animations) {
-        if (anim.name == animationName) {
-            animation = &anim;
-            break;
-        }
-    }
-
-    if (!animation) {
-        return;
-    }
-
-    std::vector<glm::mat4> boneTransforms(bones.size());
-
-    for (unsigned int i = 0; i < boneTransforms.size(); ++i) {
-        aiNodeAnim* nodeAnim = animation->nodeAnimations[bones[i].id];
-        glm::mat4 boneTransform;
-
-        if (nodeAnim) {
-            // Interpolate scaling and generate scaling transformation matrix
-            aiVector3D scaling;
-            calcInterpolatedScaling(scaling, animationTime, nodeAnim);
-            glm::mat4 scalingMat = glm::scale(glm::mat4(1.0f), glm::vec3(scaling.x, scaling.y, scaling.z));
-
-            // Interpolate rotation and generate rotation transformation matrix
-            aiQuaternion rotation;
-            calcInterpolatedRotation(rotation, animationTime, nodeAnim);
-            glm::mat4 rotationMat = glm::mat4_cast(glm::quat(rotation.w, rotation.x, rotation.y, rotation.z));
-
-            // Interpolate translation and generate translation transformation matrix
-            aiVector3D translation;
-            calcInterpolatedPosition(translation, animationTime, nodeAnim);
-            glm::mat4 translationMat = glm::translate(glm::mat4(1.0f), glm::vec3(translation.x, translation.y, translation.z));
-
-            // Combine the above transformations
-            boneTransform = translationMat * rotationMat * scalingMat;
-        }
-        else {
-            boneTransform = bones[i].offset;
-        }
-
-        boneTransforms[i] = parentTransform * boneTransform;
-    }
-
-    for (unsigned int i = 0; i < vertices.size(); ++i) {
-        glm::mat4 boneTransform = glm::mat4(0.0f);
-
-        for (unsigned int j = 0; j < vertices[i].boneIds.size(); ++j) {
-            int boneId = vertices[i].boneIds[j];
-            glm::mat4 boneWeight = vertices[i].boneWeights[j];
-            boneTransform += boneWeight * boneTransforms[boneId];
-        }
-
-        vertices[i].position = glm::vec3(boneTransform * glm::vec4(vertices[i].originalPosition, 1.0f));
-        vertices[i].normal = glm::normalize(glm::mat3(glm::transpose(glm::inverse(boneTransform))) * vertices[i].originalNormal);
     }
 }

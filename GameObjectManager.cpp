@@ -16,30 +16,31 @@ void GameObjectManager::draw()
         return;
     }
 
-    Camera& currentCamera = getCurrentCamera();
-    if(currentCamera == nullptr){
+    // Get the current camera and check if it's valid
+    Camera* currentCameraPtr = getCurrentCamera();
+    if (currentCameraPtr == nullptr) {
         return;
     }
+    Camera& currentCamera = *currentCameraPtr;
 
     glm::mat4 viewMatrix = currentCamera.getViewMatrix();
     glm::mat4 projectionMatrix = currentCamera.getProjectionMatrix();
 
-    if(!skyboxes.empty()){
-      Skybox& currentSkybox = getCurrentSkybox();
-      if(currentSkybox != nullptr){
+    Skybox* currentSkyboxPtr = getCurrentSkybox();
+    if (currentSkyboxPtr != nullptr) {
+        Skybox& currentSkybox = *currentSkyboxPtr;
         currentSkybox.draw(projectionMatrix, viewMatrix);
-      }
     }
+
 
     for (auto gameObject : gameObjects) {
         gameObject->draw(projectionMatrix, viewMatrix);
     }
 
-    currentSkybox.draw(viewMatrix);
 }
 
-std::shared_ptr<GameObject> GameObjectManager::createGameObject(const std::string& meshFilePath) {
-    auto gameObject = std::make_shared<GameObject>(meshFilePath);
+std::shared_ptr<GameObject> GameObjectManager::createGameObject(const std::string& name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
+    auto gameObject = std::make_shared<GameObject>(name, position, rotation, scale);
     gameObjects.push_back(gameObject);
     return gameObject;
 }
@@ -61,8 +62,7 @@ std::shared_ptr<GameObject> GameObjectManager::getGameObjectByName(const std::st
 }
 
 void GameObjectManager::createNewCamera(std::string cameraId, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front) {
-    Camera camera(position, up, front);
-    camera.setCameraId(cameraId);
+    Camera camera(cameraId, position, up, front);
     cameras.push_back(camera);
 }
 
@@ -88,16 +88,14 @@ void GameObjectManager::useNextCamera() {
 }
 
 void GameObjectManager::useCamera(std::string cameraId) {
-    for (size_t i = 0; i < cameras.size(); i++) {
-        if (cameras[i].getCameraId() == cameraId) {
-            cameraInUse = static_cast<int>(i);
-            return;
-        }
-    }
-    std::cout << "Camera with ID " << cameraId << " not found." << std::endl;
+  Camera* cameraPtr = getCamera(cameraId);
+  if (cameraPtr != nullptr) {
+      Camera& camera = *cameraPtr;
+      cameraInUse = camera.getCameraId();
+  }
 }
 
-Camera* GameObjectManager::GetCurrentCamera() {
+Camera* GameObjectManager::getCurrentCamera() {
     if (cameras.empty()) {
         return nullptr;
     }
@@ -105,21 +103,14 @@ Camera* GameObjectManager::GetCurrentCamera() {
 
 }
 
-void GameObjectManager::useCamera(std::string cameraId) {
-    Camera* camera = getCamera(cameraId);
-    if (camera != nullptr) {
-        cameraInUse = camera.getCameraId());
-    }
-}
 
-void GameObjectManager::createNewSkybox(const std::string& skyboxId, const std::string& directory)
+void GameObjectManager::createNewSkybox(const std::string skyboxId, const std::string& directory)
 {
-    Skybox newSkybox(directory);
-    newSkybox.setSkyboxId(skyboxId);
+    Skybox newSkybox(skyboxId, directory);
     skyboxes.push_back(newSkybox);
 }
 
-void GameObjectManager::nextSkybox() {
+void GameObjectManager::useNextSkybox() {
     if (skyboxes.empty()) {
         return;
     }
@@ -141,25 +132,20 @@ void GameObjectManager::nextSkybox() {
 }
 
 void GameObjectManager::useSkybox(std::string skyboxId) {
-    Skybox* skybox = getSkybox(skyboxId);
-    if (skybox != nullptr) {
-        skyBoxInUse = skybox.getSkyboxId();
+    Skybox* skyboxPtr = getSkybox(skyboxId);
+    if (skyboxPtr != nullptr) {
+        Skybox& skybox = *skyboxPtr;
+        skyboxInUse = skybox.getSkyboxId();
     }
 }
 
 void GameObjectManager::cleanup() {
   for (auto gameObject : gameObjects) {
-      delete gameObject;
+      delete gameObject.get();
   }
   gameObjects.clear();
 
-  for (auto camera : cameras) {
-      delete camera;
-  }
   cameras.clear();
 
-  for (auto skybox : skyboxes) {
-      delete skybox;
-  }
   skyboxes.clear();
 }
