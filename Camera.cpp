@@ -71,6 +71,17 @@ std::string Camera::getCameraId() const
   return cameraId_;
 }
 
+void Camera::setFieldofView(float fieldOfView)
+{
+  fieldOfView_ = fieldOfView;
+}
+
+float Camera::getFieldOfView() const
+{
+    return fieldOfView_;
+}
+
+
 void Camera::move(const glm::vec3& direction, float deltaTime)
 {
     position_ += direction * movementSpeed_ * deltaTime;

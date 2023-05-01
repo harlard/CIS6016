@@ -13,16 +13,34 @@ GameObject::~GameObject()
 }
 
 
+void GameObject::updateUniforms()
+{
+    // Implementation here
+}
+
 
 void GameObject::setMesh(Mesh* mesh)
 {
     this->mesh = mesh;
+    if(shaderProgram != nullptr)
+    {
+      this->mesh->setShader(shaderProgram);
+    }
 }
 
-void GameObject::setShader(ShaderProgram* shaderProgram){
+void GameObject::setShader(ShaderProgram* shaderProgram)
+{
   this->shaderProgram = shaderProgram;
+  if(mesh != nullptr)
+  {
+    mesh->setShader(shaderProgram);
+  }
 }
 
+ShaderProgram* GameObject::getShader()
+{
+  return shaderProgram;
+}
 
 void GameObject::setPosition(const glm::vec3& position)
 {
@@ -82,11 +100,16 @@ void GameObject::removeChild(GameObject* child)
     }
 }
 
+void GameObject::updateChildren(float deltaTime)
+{
+  for (auto child : children) {
+      child->update(deltaTime);
+  }
+}
+
 void GameObject::update(float deltaTime)
 {
-    for (auto child : children) {
-        child->update(deltaTime);
-    }
+  updateChildren(deltaTime);
 }
 
 void GameObject::draw(const glm::mat4& parentTransform, const glm::mat4& view)
@@ -98,18 +121,24 @@ void GameObject::draw(const glm::mat4& parentTransform, const glm::mat4& view)
     modelMatrix = glm::rotate(modelMatrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
     modelMatrix = glm::scale(modelMatrix, scale);
 
-    glm::mat4 globalTransform = parentTransform * modelMatrix;
 
     if (mesh && shaderProgram)
     {
         shaderProgram->use();
-        shaderProgram->setMat4("model", globalTransform);
+        updateUniforms();
+        shaderProgram->setMat4("projection", parentTransform);
+        shaderProgram->setMat4("model", modelMatrix);
         shaderProgram->setMat4("view", view);
         mesh->draw();
+        shaderProgram->unuse();
     }
+
+    glm::mat4 globalTransform = parentTransform * modelMatrix;
 
     for (auto& child : children)
     {
         child->draw(globalTransform, view);
     }
+
+
 }

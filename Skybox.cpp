@@ -3,7 +3,7 @@
 #include <ostream>
 #include <memory>
 
-static const float vertices_[108] = {
+const float Skybox::vertices_[108] = {
     // Back face
     -1.0f, -1.0f, -1.0f,
      1.0f, -1.0f, -1.0f,
@@ -53,12 +53,12 @@ Skybox::Skybox(const std::string& skyboxId, const std::string& directory)
 {
     // Define the faces of the cubemap
     faces_ = {
-    directory + "/right.jpg",
-    directory + "/left.jpg",
-    directory + "/top.jpg",
-    directory + "/bottom.jpg",
-    directory + "/front.jpg",
-    directory + "/back.jpg"
+    directory + "/right.png",
+    directory + "/left.png",
+    directory + "/top.png",
+    directory + "/bottom.png",
+    directory + "/front.png",
+    directory + "/back.png"
     };
 
     setup();
@@ -81,20 +81,35 @@ std::string Skybox::getSkyboxId() const
     return skyboxId_;
 }
 
+void Skybox::setLightColor(const glm::vec3& lightColor) {
+    lightColor_ = lightColor;
+}
+
+void Skybox::setLightIntensity(float lightIntensity) {
+    lightIntensity_ = lightIntensity;
+}
+
+void Skybox::updateUniforms()
+{
+  shaderProgram_->setVec3("envLightColor", lightColor_);
+  shaderProgram_->setFloat("envLightIntensity", lightIntensity_);
+}
+
+
 void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
 {
     // Disable depth testing to make sure the skybox is always drawn behind everything else
     glDepthMask(GL_FALSE);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     // Use the skybox shader program
-    if (shaderProgram_)
+    if (shaderProgram_){
         shaderProgram_->use();
+        //updateUniforms();
+        shaderProgram_->setMat4("view", view);
+        shaderProgram_->setMat4("projection", projection);
+      }
 
     // Set the view and projection matrices in the shader program
-    if (shaderProgram_)
-        shaderProgram_->setMat4("view", view);
-    if (shaderProgram_)
-        shaderProgram_->setMat4("projection", projection);
 
     // Bind the cubemap texture
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureID_);
@@ -102,10 +117,17 @@ void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
     // Draw the skybox
     glBindVertexArray(vaoID_);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindVertexArray(0);
+    glActiveTexture(GL_TEXTURE0);
+  //  glBindVertexArray(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
+    //GLint skyboxLoc = shaderProgram_->getUniformLocation("skybox");
+  //  glUniform1i(skyboxLoc, 0);
 
     // Re-enable depth testing
     glDepthMask(GL_TRUE);
+
+
+    if (shaderProgram_)
+        shaderProgram_->unuse();
 }
 
 void Skybox::setShaderProgram(std::shared_ptr<ShaderProgram> shaderProgram)

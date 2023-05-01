@@ -11,7 +11,7 @@ class ODEManager {
 public:
     ODEManager();
     ~ODEManager();
-    void update(float dt);
+    void update(float deltaTime);
     static void nearCallback(void* data, dGeomID o1, dGeomID o2);
     void addObject(ODEObject* object);
     void removeObject(ODEObject* object);

@@ -13,7 +13,10 @@ public:
     GameObject(const std::string& name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale);
     virtual ~GameObject();
 
+    virtual void updateUniforms();
+
     void setShader(ShaderProgram* shaderProgram);
+    ShaderProgram* getShader();
 
     void setMesh(Mesh* mesh);
     Mesh* getMesh() const;
@@ -26,8 +29,10 @@ public:
     glm::vec3 getRotation() const;
     glm::vec3 getScale() const;
 
-    void update(float deltaTime);
+    virtual void update(float deltaTime);
+    void updateChildren(float deltaTime);
     void draw(const glm::mat4& parentTransform, const glm::mat4& view);
+    void drawChilden(const glm::mat4& parentTransform, const glm::mat4& view);
 
     std::string getName() const;
     void setName(const std::string& name);
@@ -36,7 +41,7 @@ public:
     void addChild(GameObject* child);
     void removeChild(GameObject* child);
 
-private:
+protected:
 
     ShaderProgram* shaderProgram;
     std::string name;

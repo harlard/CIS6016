@@ -5,15 +5,13 @@
 #include <string>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 #include <glm/ext/matrix_projection.hpp>
 
 class Camera {
 public:
     Camera(const std::string& id, const glm::vec3& position, const glm::vec3& up, const glm::vec3& front);
-    void setViewport(int width, int height);
 
-    void setPosition(const glm::vec3& position);
-    void setRotation(const glm::vec3& rotation);
 
     void zoom(float deltaY);
     void look(float deltaX, float deltaY);
@@ -22,17 +20,25 @@ public:
 
     void updateVectors_();
 
-
+    float getFieldOfView() const;
+    int getViewportHeight() const;
+    int getViewportWidth() const;
     glm::vec3 getPosition() const;
     glm::vec3 getRotation() const;
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix() const;
     std::string getCameraId() const;
+    float getFarClip() const;
+    float getNearClip() const;
 
+
+    void setPosition(const glm::vec3& position);
+    void setRotation(const glm::vec3& rotation);
+    void setViewport(int width, int height);
+    void setFieldofView(float fieldOfView);
     void setFarClip(float farClip);
     void setNearClip(float nearClip);
-    float getNearClip() const;
-    float getFarClip() const;
+
 
 private:
     std::string cameraId_;

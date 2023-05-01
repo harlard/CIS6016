@@ -8,6 +8,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include "ShaderProgram.h"
 
 class Mesh {
 public:
@@ -43,7 +44,7 @@ public:
     Mesh(const std::string& filePath);
     ~Mesh();
 
-    void setShader(unsigned int shaderProgram);
+    void setShader(ShaderProgram* shaderProgram);
     void draw();
 
 private:
@@ -53,7 +54,7 @@ private:
     void updateAnimation(float animationTime, const std::string& animationName, glm::mat4 parentTransform = glm::mat4(1.0f));
 
     unsigned int VAO, VBO, EBO;
-    unsigned int shaderProgram;
+    ShaderProgram* shaderProgram;
 
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;

@@ -139,3 +139,16 @@ ALuint OpenALManager::loadSoundBuffer(const std::string& filePath)
 
     return buffer_id;
 }
+
+
+ALuint OpenALManager::createSource()
+{
+    ALuint source;
+    alGenSources(1, &source);
+    return source;
+}
+
+void OpenALManager::deleteSource(ALuint source)
+{
+    alDeleteSources(1, &source);
+}

@@ -32,17 +32,30 @@ void GameObjectManager::draw()
         currentSkybox.draw(projectionMatrix, viewMatrix);
     }
 
+    // Enable lighting before drawing game objects and lights
+    glEnable(GL_LIGHTING);
+
+    for (auto light : lights){
+        light.draw(viewMatrix, projectionMatrix);
+    }
 
     for (auto gameObject : gameObjects) {
         gameObject->draw(projectionMatrix, viewMatrix);
     }
 
+    // Disable lighting after drawing everything
+    glDisable(GL_LIGHTING);
 }
 
 std::shared_ptr<GameObject> GameObjectManager::createGameObject(const std::string& name, const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) {
     auto gameObject = std::make_shared<GameObject>(name, position, rotation, scale);
     gameObjects.push_back(gameObject);
     return gameObject;
+}
+
+void GameObjectManager::addGameObject(std::shared_ptr<GameObject> gameObject)
+{
+    gameObjects.push_back(gameObject);
 }
 
 void GameObjectManager::destroyGameObject(std::shared_ptr<GameObject> gameObject) {
@@ -103,6 +116,14 @@ Camera* GameObjectManager::getCurrentCamera() {
 
 }
 
+Camera* GameObjectManager::getCamera(std::string cameraId) {
+    for (int i = 0; i < cameras.size(); i++) {
+        if (cameras[i].getCameraId() == cameraId) {
+            return &cameras[i];
+        }
+    }
+    return nullptr; // camera with the given ID not found
+}
 
 void GameObjectManager::createNewSkybox(const std::string skyboxId, const std::string& directory)
 {
@@ -137,6 +158,47 @@ void GameObjectManager::useSkybox(std::string skyboxId) {
         Skybox& skybox = *skyboxPtr;
         skyboxInUse = skybox.getSkyboxId();
     }
+}
+
+Skybox* GameObjectManager::getCurrentSkybox(){
+  if (skyboxes.empty()) {
+      return nullptr;
+  }
+  return getSkybox(skyboxInUse);
+
+}
+
+Skybox* GameObjectManager::getSkybox(std::string skyboxId) {
+    for (auto& skybox : skyboxes) {
+        if (skybox.getSkyboxId() == skyboxId) {
+            return &skybox;
+        }
+    }
+    return nullptr; // return nullptr if the skybox is not found
+}
+
+void GameObjectManager::createLight(const std::string lightId, const std::string type, glm::vec3 color, float intensity)
+{
+  Light newLight(lightId, type, color, intensity);
+  lights.push_back(newLight);
+}
+
+void GameObjectManager::deleteLight(std::string lightId) {
+    for (auto it = lights.begin(); it != lights.end(); ++it) {
+        if (it->getLightId() == lightId) {
+            lights.erase(it);
+            break;
+        }
+    }
+}
+
+Light* GameObjectManager::getLight(std::string lightId) {
+    for (auto& light : lights) {
+        if (light.getLightId() == lightId) {
+            return &light;
+        }
+    }
+    return nullptr;
 }
 
 void GameObjectManager::cleanup() {

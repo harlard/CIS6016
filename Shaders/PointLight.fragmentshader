@@ -1,0 +1,15 @@
+// Fragment Shader
+precision highp float;
+
+uniform vec3 lightPosition;
+uniform vec3 lightColor;
+uniform float lightIntensity;
+
+varying vec3 fragPos;
+
+void main() {
+
+vec3 diffuse = lightIntensity;
+
+gl_FragColor = vec4(diffuse, 1.0);
+}

@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.cpp GlfwManager.cpp InputManager.cpp ODEManager.cpp OpenALManager.cpp GameObjectManager.cpp ShaderProgram.cpp GameObject.cpp Mesh.cpp Camera.cpp Skybox.cpp ODEObject.cpp
+OBJS = main.cpp GlfwManager.cpp InputManager.cpp ODEManager.cpp OpenALManager.cpp GameObjectManager.cpp ShaderProgram.cpp GameObject.cpp Mesh.cpp Camera.cpp Skybox.cpp ODEObject.cpp Light.cpp Ovni.cpp
 
 #CC specifies which compiler we're using
 CC = g++
@@ -12,7 +12,7 @@ OPENGL_FLAGS =  -lGLEW -lGLU -lm -lGL -lstb
 GLSL_FLAGS = -lglslang -lOSDependent -lHLSL -lOGLCompiler -lSPVRemapper
 GLFW_FLAGS = -lglfw -lXrandr -lpthread -lxcb -lXxf86vm -lXi -lXinerama -lX11 -lrt -ldl
 ASSIMP_FLAGS = -lassimp -lstdc++ -lz
-OPENAL_FLAGS = -lopenal
+OPENAL_FLAGS = -lopenal -lsndfile
 ODE_FLAGS = -lode
 
 #OBJ_NAME specifies the name of our exectuable

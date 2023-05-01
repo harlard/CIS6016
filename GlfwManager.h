@@ -11,7 +11,9 @@ public:
     ~GlfwManager();
 
     bool init(int widthW, int heightW);
+    void clearWindow();
     void cleanup();
+
 
     GLFWwindow* getWindow() const;
     bool shouldClose() const;
@@ -23,5 +25,5 @@ private:
       GLFWwindow* window;
       int width;
       int height;
-      static double prevTime;
+      double prevTime;
     };

@@ -13,24 +13,24 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &EBO);
 }
 
-void Mesh::setShader(unsigned int shaderProgram) {
+void Mesh::setShader(ShaderProgram* shaderProgram) {
     this->shaderProgram = shaderProgram;
 }
 
 void Mesh::draw() {
-    glUseProgram(shaderProgram);
-
-    for (unsigned int i = 0; i < textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
-        glUniform1i(glGetUniformLocation(shaderProgram, textures[i].type.c_str()), i);
+    // set texture uniforms
+    int textureIndex = 0;
+    for (const Texture& texture : textures) {
+        std::string uniformName = "texture_" + std::to_string(textureIndex++);
+        shaderProgram->setInt(uniformName.c_str(), textureIndex);
+        glActiveTexture(GL_TEXTURE0 + textureIndex);
+        glBindTexture(GL_TEXTURE_2D, texture.id);
     }
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 
-    glUseProgram(0);
 }
 
 void Mesh::loadMesh(const std::string& filePath) {

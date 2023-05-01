@@ -2,6 +2,8 @@
 
 dWorldID ODEManager::world = dWorldCreate();
 dJointGroupID ODEManager::contactgroup = dJointGroupCreate(0);
+dSpaceID ODEManager::space = nullptr;
+
 
 ODEManager::ODEManager() {
     // Initialize ODE
