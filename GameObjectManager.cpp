@@ -25,7 +25,7 @@ void GameObjectManager::draw()
 
     glm::mat4 viewMatrix = currentCamera.getViewMatrix();
     glm::mat4 projectionMatrix = currentCamera.getProjectionMatrix();
-
+    glm::vec3 cameraPos = currentCamera.getPosition();
     Skybox* currentSkyboxPtr = getCurrentSkybox();
     if (currentSkyboxPtr != nullptr) {
         Skybox& currentSkybox = *currentSkyboxPtr;

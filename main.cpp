@@ -30,7 +30,7 @@ int main() {
     gameObjectManager.useCamera("main_camera");
     gameObjectManager.getCamera("main_camera")->setViewport(800,600);
     gameObjectManager.getCamera("main_camera")->setFieldofView(glm::radians(45.0f));
-    gameObjectManager.getCamera("main_camera")->setNearClip(0.1f);
+    gameObjectManager.getCamera("main_camera")->setNearClip(0.01f);
     gameObjectManager.getCamera("main_camera")->setFarClip(500.0f);
     //create skybox
     ShaderProgram skyboxShader = ShaderProgram("Shaders/SkyboxShader.vertexshader", "Shaders/SkyboxShader.fragmentshader");
@@ -43,7 +43,8 @@ int main() {
     //create a source of light
   //  ShaderProgram lightShader = ShaderProgram("Shaders/PointLight.vertexshader", "Shaders/PointLight.fragmentshader");
     gameObjectManager.createLight("pointLight1", "Point", glm::vec3(1.0f, 1.0f, 1.0f), 1.0f);
-    gameObjectManager.getLight("pointLight1")->setColor(glm::vec3(1.0f, 1.0f, 10.0f));
+    gameObjectManager.getLight("pointLight1")->setPosition(glm::vec3(1.0f, 1.0f, 10.0f));
+    gameObjectManager.getLight("pointLight1")->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
     gameObjectManager.getLight("pointLight1")->setIntensity(100.0f);
   //  gameObjectManager.getLight("pointLight1")->setShader(&lightShader);
 

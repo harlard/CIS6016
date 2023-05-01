@@ -99,7 +99,7 @@ void Skybox::updateUniforms()
 void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
 {
     // Disable depth testing to make sure the skybox is always drawn behind everything else
-    glDepthMask(GL_FALSE);
+    glDepthFunc(GL_LEQUAL);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     // Use the skybox shader program
     if (shaderProgram_){
@@ -121,7 +121,7 @@ void Skybox::draw(const glm::mat4& view, const glm::mat4& projection)
   //  glBindVertexArray(GL_TEXTURE_CUBE_MAP, skyboxTextureID);
     //GLint skyboxLoc = shaderProgram_->getUniformLocation("skybox");
   //  glUniform1i(skyboxLoc, 0);
-
+    glBindVertexArray(0);
     // Re-enable depth testing
     glDepthMask(GL_TRUE);
 
